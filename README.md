@@ -1,3 +1,30 @@
+# 🌀 dejavu
+
+**dejavu** scans your OneDrive folder for .xlsx files and generates a `dejavu.xlsx` file in the same folder containing rows where a target column has duplicate values across those files.
+
+## 🔍 Example:
+
+- **Folder**: dv-A/dv-B
+- **Column**: Client ID
+
+To trigger a sync:
+
+`GET /api/sync?folder=dv-A/dv-B&column=Client ID`
+
+## 🗓 Scheduling
+
+1. Visit `/api/token` in your browser.
+2. Authorize access to your OneDrive. This will return a **refresh token**.
+3. Use this token to schedule syncs via curl, CRON, or your scheduler of choice.
+
+**Example:**
+
+```bash
+curl -X GET \
+  'https://your-app-url/api/sync?folder=dv-A/dv-B&column=Client ID' \
+  -H 'Authorization: Bearer YOUR_REFRESH_TOKEN'
+```
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
