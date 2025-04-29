@@ -1,29 +1,105 @@
 # 🌀 dejavu
 
-**dejavu** scans your OneDrive folder for .xlsx files and generates a `dejavu.xlsx` file in the same folder containing rows where a target column has duplicate values across those files.
+**dejavu** scans your OneDrive folder for `.xlsx` files and generates a `dejavu.xlsx` file containing rows where a specific column has duplicate values across those files.
 
-## 🔍 Example:
+## 🔍 Example
 
-- **Folder**: dv-A/dv-B
-- **Column**: Client ID
+Suppose you want to detect duplicate rows by the `Client ID` column inside the folder `dv-A/dv-B`.
 
-To trigger a sync:
+- **Folder**: `dv-A/dv-B`
+- **Column**: `Client ID`
 
-`GET https://dejavu-psi.vercel.app/api/sync?folder=dv-A/dv-B&column=Client ID`
+You have two ways to trigger a sync:
 
-## 🗓 Scheduling
+### 🖱 Option 1: Use the UI
 
-1. Visit `https://dejavu-psi.vercel.app/api/token` in your browser.
-2. Authorize access to your OneDrive. This will return a **refresh token**.
-3. Use this token to schedule syncs via curl, CRON, or your scheduler of choice.
+Visit [https://dejavu-psi.vercel.app](https://dejavu-psi.vercel.app), sign in with your Microsoft account, and click **Sync**.
 
-**Example:**
+### 🛠 Option 2: Manual API Call
 
-```bash
+```
+GET https://dejavu-psi.vercel.app/api/sync?folder=dv-A/dv-B&column=Client ID
+```
+
+- If authenticated in the browser, this uses your session.
+- If called from a script/server, you must provide a token (see below).
+
+## 🗓 Scheduled Syncs
+
+You can automate duplicate detection using a token and your scheduler of choice.
+
+### 🔑 Step 1: Generate a Token
+
+Visit:
+
+👉 https://dejavu-psi.vercel.app/api/token
+
+You’ll be prompted to authorize access to your OneDrive.
+This will return a refresh token — keep it safe, as it grants access to your files.
+
+---
+
+### 🔁 Step 2: Schedule Syncs
+
+Use the token to hit the `https://dejavu-psi.vercel.app/api/sync` endpoint.  
+You must include:
+
+- **folder**: the OneDrive path to scan (e.g., `dv-A/dv-B`)
+- **column**: the target column header (e.g., `Client ID`)
+- **Authorization**: `Bearer YOUR_TOKEN`
+
+---
+
+### 🧪 Example: curl
+
+```sh
 curl -X GET \
   'https://dejavu-psi.vercel.app/api/sync?folder=dv-A/dv-B&column=Client ID' \
-  -H 'Authorization: Bearer YOUR_REFRESH_TOKEN'
+  -H 'Authorization: Bearer YOUR_TOKEN'
 ```
+
+### ☁️ Example: Cloudflare Worker (Scheduled Cron Job)
+
+```js
+export default {
+  async scheduled(event, env, ctx) {
+    try {
+      const url = new URL('https://dejavu-psi.vercel.app/api/sync')
+      url.searchParams.set('folder', env.FOLDER)
+      url.searchParams.set('column', env.COLUMN)
+
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${env.TOKEN}`
+        }
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error(
+          `Failed to sync. Status: ${res.status}. Response:`,
+          errorText
+        )
+        return new Response('Failed to sync reports', { status: 500 })
+      }
+
+      const data = await res.json()
+
+      console.log('Successfully synced:', data.message)
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    } catch (err) {
+      console.error('Unexpected error during scheduled sync:', err)
+      return new Response('Unexpected error', { status: 500 })
+    }
+  }
+}
+```
+
+🛠 Be sure to define the `FOLDER`, `COLUMN`, and `TOKEN` in your Cloudflare Worker environment variables.
 
 ---
 
