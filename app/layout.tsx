@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'dejavu',
   description:
-    'Generates a list of duplicate rows found in XLSX files in your OneDrive folder'
+    'Scans your OneDrive folder for .xlsx files and generates a dejavu.xlsx file in the same folder containing rows where a target column has duplicate values across those files'
 }
 
 export default function RootLayout({

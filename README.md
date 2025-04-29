@@ -25,6 +25,8 @@ curl -X GET \
   -H 'Authorization: Bearer YOUR_REFRESH_TOKEN'
 ```
 
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

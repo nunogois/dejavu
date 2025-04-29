@@ -5,6 +5,7 @@ import { findDuplicates } from './findDuplicates'
 import { buildSummaryExcel } from './buildSummaryExcel'
 import { retryUploadSummary } from './retryUploadSummary'
 import { downloadExistingDejavu } from './downloadExistingDejavu'
+import { DataRow } from '@/types/datarow'
 
 export async function processReports(
   accessToken: string,
@@ -20,12 +21,12 @@ export async function processReports(
   )
 
   const alreadyProcessed = new Set(
-    existing.map(r => r.__sourceFile?.toLowerCase()).filter(Boolean)
+    existing.map(r => (r.__sourceFile as string)?.toLowerCase()).filter(Boolean)
   )
 
   const files = await listFiles(accessToken, folderName)
 
-  const newRows: Record<string, any>[] = []
+  const newRows: DataRow[] = []
 
   for (const file of files) {
     const name = file.name.toLowerCase()

@@ -1,10 +1,11 @@
+import { DataRow } from '@/types/datarow'
 import * as XLSX from 'xlsx'
 
-export function parseExcel(buffer: Buffer, fileName?: string) {
+export function parseExcel(buffer: Buffer, fileName?: string): DataRow[] {
   const workbook = XLSX.read(buffer, { type: 'buffer' })
   const sheetName = workbook.SheetNames[0]
   const sheet = workbook.Sheets[sheetName]
-  const rawRows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet)
+  const rawRows = XLSX.utils.sheet_to_json<DataRow>(sheet)
 
   const rows = rawRows.filter(row =>
     Object.values(row).some(value => value !== null && value !== '')

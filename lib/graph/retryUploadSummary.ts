@@ -12,8 +12,8 @@ export async function retryUploadSummary(
     try {
       await uploadSummary(accessToken, folderName, dejavuFile, buffer)
       return
-    } catch (err: any) {
-      const isLocked = err.message?.includes('locked')
+    } catch (err: unknown) {
+      const isLocked = (err as Error).message?.includes('locked')
       const isLast = attempt === maxAttempts
 
       if (!isLocked || isLast) throw err

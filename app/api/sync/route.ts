@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   if (bearerToken) {
     try {
       accessToken = await getAccessTokenFromRefreshToken(bearerToken)
-    } catch (e) {
+    } catch {
       return new Response('Failed to get access token from refresh token', {
         status: 401
       })
