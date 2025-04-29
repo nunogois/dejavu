@@ -35,7 +35,7 @@ Visit:
 👉 https://dejavu-psi.vercel.app/api/token
 
 You’ll be prompted to authorize access to your OneDrive.
-This will return a refresh token — keep it safe, as it grants access to your files.
+This will return a token — keep it safe, as it grants access to your files.
 
 ---
 
