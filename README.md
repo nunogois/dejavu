@@ -9,11 +9,11 @@
 
 To trigger a sync:
 
-`GET /api/sync?folder=dv-A/dv-B&column=Client ID`
+`GET https://dejavu-psi.vercel.app/api/sync?folder=dv-A/dv-B&column=Client ID`
 
 ## 🗓 Scheduling
 
-1. Visit `/api/token` in your browser.
+1. Visit `https://dejavu-psi.vercel.app/api/token` in your browser.
 2. Authorize access to your OneDrive. This will return a **refresh token**.
 3. Use this token to schedule syncs via curl, CRON, or your scheduler of choice.
 
@@ -21,7 +21,7 @@ To trigger a sync:
 
 ```bash
 curl -X GET \
-  'https://your-app-url/api/sync?folder=dv-A/dv-B&column=Client ID' \
+  'https://dejavu-psi.vercel.app/api/sync?folder=dv-A/dv-B&column=Client ID' \
   -H 'Authorization: Bearer YOUR_REFRESH_TOKEN'
 ```
 
