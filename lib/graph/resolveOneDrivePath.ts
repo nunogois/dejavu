@@ -1,3 +1,16 @@
+type DriveItem = {
+  id: string
+  name: string
+  folder?: unknown
+  parentReference: {
+    driveId: string
+  }
+}
+
+type SharedItem = {
+  remoteItem?: DriveItem
+}
+
 export async function resolveOneDrivePath(
   accessToken: string,
   folderName: string,
@@ -20,7 +33,7 @@ export async function resolveOneDrivePath(
       throw new Error(`Failed to resolve personal path: ${error}`)
     }
 
-    const data = await res.json()
+    const data: DriveItem = await res.json()
     return {
       driveId: data.parentReference.driveId,
       itemId: data.id
@@ -41,14 +54,13 @@ export async function resolveOneDrivePath(
     throw new Error(`Failed to fetch shared items: ${error}`)
   }
 
-  const sharedItems = await sharedRes.json()
+  const sharedItems: { value: SharedItem[] } = await sharedRes.json()
 
   const folder = sharedItems.value.find(
-    (item: any) =>
-      item.remoteItem?.name === folderName && item.remoteItem?.folder
+    item => item.remoteItem?.name === folderName && item.remoteItem.folder
   )
 
-  if (!folder) {
+  if (!folder || !folder.remoteItem) {
     throw new Error(`Shared folder '${folderName}' not found.`)
   }
 
@@ -75,8 +87,8 @@ export async function resolveOneDrivePath(
     throw new Error(`Failed to list children in shared folder: ${error}`)
   }
 
-  const children = await childrenRes.json()
-  const match = children.value.find((item: any) => item.name === fileName)
+  const children: { value: DriveItem[] } = await childrenRes.json()
+  const match = children.value.find(item => item.name === fileName)
 
   if (!match) {
     throw new Error(
