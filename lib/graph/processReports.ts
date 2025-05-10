@@ -10,23 +10,26 @@ import { DataRow } from '@/types/datarow'
 export async function processReports(
   accessToken: string,
   folderName: string,
+  isSharedFolder: boolean,
   column: string,
   sheetName: string | null,
-  fileFilter: string | null
+  fileFilter: string | null,
+  outputFile: string | null
 ) {
-  const dejavuFile = `${process.env.ONEDRIVE_DUPLICATES_FILE || 'dejavu'}.xlsx`
+  const dejavuFile = `${outputFile || 'dejavu'}.xlsx`
 
   const existing = await downloadExistingDejavu(
     accessToken,
     folderName,
-    dejavuFile
+    dejavuFile,
+    isSharedFolder
   )
 
   const alreadyProcessed = new Set(
     existing.map(r => (r.__sourceFile as string)?.toLowerCase()).filter(Boolean)
   )
 
-  const files = await listFiles(accessToken, folderName)
+  const files = await listFiles(accessToken, folderName, isSharedFolder)
 
   const newRows: DataRow[] = []
 
@@ -62,7 +65,13 @@ export async function processReports(
   }
 
   const summary = buildSummaryExcel(grouped)
-  await retryUploadSummary(accessToken, folderName, dejavuFile, summary)
+  await retryUploadSummary(
+    accessToken,
+    folderName,
+    dejavuFile,
+    summary,
+    isSharedFolder
+  )
 
   const message = `Uploaded ${newCount} duplicate rows to ${dejavuFile}.`
   console.log(message)

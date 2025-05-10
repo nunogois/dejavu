@@ -64,9 +64,11 @@ curl -X GET \
 async function syncReports(env) {
   const url = new URL('https://dejavu-psi.vercel.app/api/sync')
   url.searchParams.set('folder', env.FOLDER)
+  url.searchParams.set('is_shared_folder', '1')
   url.searchParams.set('column', env.COLUMN)
   url.searchParams.set('sheet', env.SHEET)
   url.searchParams.set('file_filter', env.FILE_FILTER)
+  url.searchParams.set('output_file', env.OUTPUT_FILE)
 
   const res = await fetch(url.toString(), {
     method: 'GET',

@@ -10,9 +10,11 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url)
   const folder = searchParams.get('folder')
+  const isSharedFolder = searchParams.get('is_shared_folder') === '1'
   const sheet = searchParams.get('sheet')
   const column = searchParams.get('column')
   const fileFilter = searchParams.get('file_filter')
+  const outputFile = searchParams.get('output_file')
 
   if (!folder || !column) {
     return new Response('Missing folder or column', { status: 400 })
@@ -41,9 +43,11 @@ export async function GET(req: NextRequest) {
     const result = await processReports(
       accessToken,
       folder,
+      isSharedFolder,
       column,
       sheet,
-      fileFilter
+      fileFilter,
+      outputFile
     )
     return Response.json({ message: result })
   } catch (e) {

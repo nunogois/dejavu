@@ -4,13 +4,20 @@ export async function retryUploadSummary(
   accessToken: string,
   folderName: string,
   dejavuFile: string,
-  buffer: Buffer
+  buffer: Buffer,
+  isSharedFolder: boolean
 ) {
   const maxAttempts = 3
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await uploadSummary(accessToken, folderName, dejavuFile, buffer)
+      await uploadSummary(
+        accessToken,
+        folderName,
+        dejavuFile,
+        buffer,
+        isSharedFolder
+      )
       return
     } catch (err: unknown) {
       const isLocked = (err as Error).message?.includes('locked')

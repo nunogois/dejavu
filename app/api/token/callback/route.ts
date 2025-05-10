@@ -32,7 +32,25 @@ export async function GET(req: NextRequest) {
   const refreshToken = data.refresh_token
 
   return new Response(
-    `<html><body style="font-family: sans-serif; padding: 2rem;"><h1>Refresh Token</h1><code style="word-break: break-all; background: #f5f5f5; display: block; padding: 1rem;">${refreshToken}</code><p>Save this securely in your .env or secret store.</p></body></html>`,
+    `<html>
+    <body style="font-family: sans-serif; padding: 2rem;">
+      <h1>Refresh Token</h1>
+      <code id="token" style="word-break: break-all; background: #f5f5f5; display: block; padding: 1rem;">${refreshToken}</code>
+      <button onclick="copy()" style="margin-top: 1rem;">Copy to clipboard</button>
+      <p id="status" style="color: green; display: none; margin-top: 0.5rem;">Copied!</p>
+      <p>Save this securely in your .env or secret store.</p>
+      <script>
+        function copy() {
+          const text = document.getElementById('token').textContent;
+          navigator.clipboard.writeText(text).then(() => {
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            setTimeout(() => { status.style.display = 'none'; }, 2000);
+          });
+        }
+      </script>
+    </body>
+  </html>`,
     { headers: { 'Content-Type': 'text/html' } }
   )
 }

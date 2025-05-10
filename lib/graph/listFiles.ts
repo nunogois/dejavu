@@ -1,3 +1,5 @@
+import { resolveOneDrivePath } from './resolveOneDrivePath'
+
 export type OneDriveFile = {
   id: string
   name: string
@@ -5,10 +7,18 @@ export type OneDriveFile = {
 
 export async function listFiles(
   accessToken: string,
-  folderName: string
+  folderName: string,
+  isSharedFolder: boolean
 ): Promise<OneDriveFile[]> {
+  const { driveId, itemId } = await resolveOneDrivePath(
+    accessToken,
+    folderName,
+    undefined,
+    isSharedFolder
+  )
+
   const res = await fetch(
-    `https://graph.microsoft.com/v1.0/me/drive/root:/${folderName}:/children`,
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/children`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`

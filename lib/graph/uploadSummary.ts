@@ -1,11 +1,21 @@
+import { resolveOneDrivePath } from './resolveOneDrivePath'
+
 export async function uploadSummary(
   accessToken: string,
   folderName: string,
   dejavuFile: string,
-  buffer: Buffer
+  buffer: Buffer,
+  isSharedFolder: boolean
 ) {
-  const res = await fetch(
-    `https://graph.microsoft.com/v1.0/me/drive/root:/${folderName}/${dejavuFile}:/content`,
+  const { driveId, itemId: folderId } = await resolveOneDrivePath(
+    accessToken,
+    folderName,
+    undefined,
+    isSharedFolder
+  )
+
+  const uploadRes = await fetch(
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}:/${dejavuFile}:/content`,
     {
       method: 'PUT',
       headers: {
@@ -17,8 +27,8 @@ export async function uploadSummary(
     }
   )
 
-  if (!res.ok) {
-    const error = await res.json()
+  if (!uploadRes.ok) {
+    const error = await uploadRes.json()
     throw new Error(`Failed to upload summary: ${error.error?.message}`)
   }
 }

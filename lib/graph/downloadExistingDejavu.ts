@@ -1,35 +1,22 @@
 import { downloadFile } from './downloadFile'
 import { parseExcel } from './parseExcel'
+import { resolveOneDrivePath } from './resolveOneDrivePath'
 
 export async function downloadExistingDejavu(
   accessToken: string,
   folderName: string,
-  dejavuFile: string
+  dejavuFile: string,
+  isSharedFolder: boolean
 ) {
   try {
-    const metadataRes = await fetch(
-      `https://graph.microsoft.com/v1.0/me/drive/root:/${folderName}/${dejavuFile}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      }
+    const { itemId } = await resolveOneDrivePath(
+      accessToken,
+      folderName,
+      dejavuFile,
+      isSharedFolder
     )
 
-    if (metadataRes.status === 404) {
-      console.log(`No existing ${dejavuFile} found in folder ${folderName}.`)
-      return []
-    }
-
-    if (!metadataRes.ok) {
-      const error = await metadataRes.text()
-      throw new Error(`Failed to locate dejavu file: ${error}`)
-    }
-
-    const metadata = await metadataRes.json()
-    const fileId = metadata.id
-
-    const buffer = await downloadFile(accessToken, fileId)
+    const buffer = await downloadFile(accessToken, itemId)
     const rows = parseExcel(buffer)
 
     return rows
