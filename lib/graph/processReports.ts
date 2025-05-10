@@ -33,6 +33,10 @@ export async function processReports(
 
   const newRows: DataRow[] = []
 
+  console.log(`Found ${files.length} files in the folder:`, {
+    files: files.map(f => f.name)
+  })
+
   for (const file of files) {
     const name = file.name.toLowerCase()
     if (
