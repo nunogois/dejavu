@@ -33,19 +33,13 @@ export async function processReports(
 
   const newRows: DataRow[] = []
 
-  console.log(`Found ${files.length} files in the folder:`, {
-    files: files.map(f => f.name)
-  })
-
   for (const file of files) {
     const name = file.name.toLowerCase()
-
-    console.log({ name, fileFilter, includes: name.includes(fileFilter!) })
 
     if (
       name === dejavuFile.toLowerCase() ||
       alreadyProcessed.has(name) ||
-      (fileFilter && !name.includes(fileFilter))
+      (fileFilter && !name.includes(fileFilter.toLowerCase()))
     )
       continue
 
