@@ -39,6 +39,9 @@ export async function processReports(
 
   for (const file of files) {
     const name = file.name.toLowerCase()
+
+    console.log({ name, fileFilter, includes: name.includes(fileFilter!) })
+
     if (
       name === dejavuFile.toLowerCase() ||
       alreadyProcessed.has(name) ||
