@@ -10,7 +10,9 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url)
   const folder = searchParams.get('folder')
+  const sheet = searchParams.get('sheet')
   const column = searchParams.get('column')
+  const fileFilter = searchParams.get('file_filter')
 
   if (!folder || !column) {
     return new Response('Missing folder or column', { status: 400 })
@@ -36,7 +38,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await processReports(accessToken, folder, column)
+    const result = await processReports(
+      accessToken,
+      folder,
+      column,
+      sheet,
+      fileFilter
+    )
     return Response.json({ message: result })
   } catch (e) {
     console.error('Error processing reports', (e as Error).message)

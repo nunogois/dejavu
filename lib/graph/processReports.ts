@@ -10,7 +10,9 @@ import { DataRow } from '@/types/datarow'
 export async function processReports(
   accessToken: string,
   folderName: string,
-  column: string
+  column: string,
+  sheetName: string | null,
+  fileFilter: string | null
 ) {
   const dejavuFile = `${process.env.ONEDRIVE_DUPLICATES_FILE || 'dejavu'}.xlsx`
 
@@ -30,12 +32,19 @@ export async function processReports(
 
   for (const file of files) {
     const name = file.name.toLowerCase()
-    if (name === dejavuFile.toLowerCase() || alreadyProcessed.has(name))
+    if (
+      name === dejavuFile.toLowerCase() ||
+      alreadyProcessed.has(name) ||
+      (fileFilter && !name.includes(fileFilter))
+    )
       continue
 
     console.log(`Processing file: ${file.name}...`)
     const buffer = await downloadFile(accessToken, file.id)
-    const rows = parseExcel(buffer, file.name)
+    const rows = parseExcel(buffer, {
+      sheetName,
+      fileName: file.name
+    })
     newRows.push(...rows)
   }
 

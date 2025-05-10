@@ -61,40 +61,42 @@ curl -X GET \
 ### ☁️ Example: Cloudflare Worker (Scheduled Cron Job)
 
 ```js
+async function syncReports(env) {
+  const url = new URL('https://dejavu-psi.vercel.app/api/sync')
+  url.searchParams.set('folder', env.FOLDER)
+  url.searchParams.set('column', env.COLUMN)
+  url.searchParams.set('sheet', env.SHEET)
+  url.searchParams.set('file_filter', env.FILE_FILTER)
+
+  const res = await fetch(url.toString(), {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${env.TOKEN}`
+    }
+  })
+
+  if (!res.ok) {
+    const errorText = await res.text()
+    console.error(`Failed to sync. Status: ${res.status}. Response:`, errorText)
+    return new Response('Failed to sync reports', { status: 500 })
+  }
+
+  const data = await res.json()
+
+  console.log('Successfully synced:', data.message)
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
+
 export default {
   async scheduled(event, env, ctx) {
-    try {
-      const url = new URL('https://dejavu-psi.vercel.app/api/sync')
-      url.searchParams.set('folder', env.FOLDER)
-      url.searchParams.set('column', env.COLUMN)
+    return await syncReports(env)
+  },
 
-      const res = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${env.TOKEN}`
-        }
-      })
-
-      if (!res.ok) {
-        const errorText = await res.text()
-        console.error(
-          `Failed to sync. Status: ${res.status}. Response:`,
-          errorText
-        )
-        return new Response('Failed to sync reports', { status: 500 })
-      }
-
-      const data = await res.json()
-
-      console.log('Successfully synced:', data.message)
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      })
-    } catch (err) {
-      console.error('Unexpected error during scheduled sync:', err)
-      return new Response('Unexpected error', { status: 500 })
-    }
+  async fetch(request, env, ctx) {
+    return await syncReports(env)
   }
 }
 ```
