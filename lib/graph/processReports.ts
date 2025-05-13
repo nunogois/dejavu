@@ -14,7 +14,8 @@ export async function processReports(
   column: string,
   sheetName: string | null,
   fileFilter: string | null,
-  outputFile: string | null
+  outputFile: string | null,
+  skipAlreadyReported: boolean
 ) {
   const dejavuFile = `${outputFile || 'dejavu'}.xlsx`
 
@@ -25,9 +26,13 @@ export async function processReports(
     isSharedFolder
   )
 
-  const alreadyProcessed = new Set(
-    existing.map(r => (r.__sourceFile as string)?.toLowerCase()).filter(Boolean)
-  )
+  const alreadyProcessed = skipAlreadyReported
+    ? new Set(
+        existing
+          .map(r => (r.__sourceFile as string)?.toLowerCase())
+          .filter(Boolean)
+      )
+    : new Set<string>()
 
   const { driveId, files } = await listFiles(
     accessToken,
@@ -70,7 +75,7 @@ export async function processReports(
   }
 
   console.log(
-    `Found ${newCount} new duplicate rows in ${newRows.length} new files.`
+    `Found ${newCount} new duplicate rows in ${newRows.length} total processed rows.`
   )
 
   const summary = buildSummaryExcel(grouped)
