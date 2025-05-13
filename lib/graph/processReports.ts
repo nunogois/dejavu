@@ -69,6 +69,10 @@ export async function processReports(
     return message
   }
 
+  console.log(
+    `Found ${newCount} new duplicate rows in ${newRows.length} new files.`
+  )
+
   const summary = buildSummaryExcel(grouped)
   await retryUploadSummary(
     accessToken,

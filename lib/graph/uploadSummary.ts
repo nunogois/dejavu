@@ -29,6 +29,6 @@ export async function uploadSummary(
 
   if (!uploadRes.ok) {
     const error = await uploadRes.json()
-    throw new Error(`Failed to upload summary: ${error.error?.message}`)
+    throw new Error(`Failed to upload summary: ${error.error?.message}`, error)
   }
 }
