@@ -1,6 +1,10 @@
-export async function downloadFile(accessToken: string, fileId: string) {
+export async function downloadFile(
+  accessToken: string,
+  driveId: string,
+  fileId: string
+) {
   const res = await fetch(
-    `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`,
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${fileId}/content`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`

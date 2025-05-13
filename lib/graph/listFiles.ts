@@ -9,7 +9,7 @@ export async function listFiles(
   accessToken: string,
   folderName: string,
   isSharedFolder: boolean
-): Promise<OneDriveFile[]> {
+): Promise<{ driveId: string; files: OneDriveFile[] }> {
   const { driveId, itemId } = await resolveOneDrivePath(
     accessToken,
     folderName,
@@ -32,5 +32,5 @@ export async function listFiles(
   }
 
   const data = await res.json()
-  return data.value as OneDriveFile[]
+  return { driveId, files: data.value as OneDriveFile[] }
 }

@@ -9,19 +9,19 @@ export async function downloadExistingDejavu(
   isSharedFolder: boolean
 ) {
   try {
-    const { itemId } = await resolveOneDrivePath(
+    const { driveId, itemId } = await resolveOneDrivePath(
       accessToken,
       folderName,
       dejavuFile,
       isSharedFolder
     )
 
-    const buffer = await downloadFile(accessToken, itemId)
+    const buffer = await downloadFile(accessToken, driveId, itemId)
     const rows = parseExcel(buffer)
 
     return rows
-  } catch (err) {
-    console.error('Error downloading existing dejavu file:', err)
+  } catch (e) {
+    console.info('No existing dejavu file found.', e)
     return []
   }
 }

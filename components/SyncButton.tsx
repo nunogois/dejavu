@@ -31,8 +31,8 @@ export const SyncButton = ({ setMessage }: ISyncButtonProps) => {
 
       const data = await res.json()
       setMessage(data.message || 'Done.')
-    } catch (err) {
-      console.error('Error syncing reports:', err)
+    } catch (e) {
+      console.error('Error syncing reports:', e)
       setMessage('Error syncing reports. Please try again.')
     } finally {
       setLoading(false)

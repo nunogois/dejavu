@@ -29,7 +29,11 @@ export async function processReports(
     existing.map(r => (r.__sourceFile as string)?.toLowerCase()).filter(Boolean)
   )
 
-  const files = await listFiles(accessToken, folderName, isSharedFolder)
+  const { driveId, files } = await listFiles(
+    accessToken,
+    folderName,
+    isSharedFolder
+  )
 
   const newRows: DataRow[] = []
 
@@ -44,7 +48,7 @@ export async function processReports(
       continue
 
     console.log(`Processing file: ${file.name}...`)
-    const buffer = await downloadFile(accessToken, file.id)
+    const buffer = await downloadFile(accessToken, driveId, file.id)
     const rows = parseExcel(buffer, {
       sheetName,
       fileName: file.name

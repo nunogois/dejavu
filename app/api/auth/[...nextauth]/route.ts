@@ -53,8 +53,8 @@ const authOptions: AuthOptions = {
           expires_at: Math.floor(Date.now() / 1000 + refreshed.expires_in),
           refresh_token: refreshed.refresh_token ?? token.refresh_token
         }
-      } catch (error) {
-        console.error('Error refreshing Azure access_token', error)
+      } catch (e) {
+        console.error('Error refreshing Azure access_token', e)
         token.error = 'RefreshTokenError'
         return token
       }

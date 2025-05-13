@@ -19,11 +19,11 @@ export async function retryUploadSummary(
         isSharedFolder
       )
       return
-    } catch (err: unknown) {
-      const isLocked = (err as Error).message?.includes('locked')
+    } catch (e: unknown) {
+      const isLocked = (e as Error).message?.includes('locked')
       const isLast = attempt === maxAttempts
 
-      if (!isLocked || isLast) throw err
+      if (!isLocked || isLast) throw e
 
       const jitter = Math.floor(Math.random() * 300)
       const wait = 1000 * attempt + jitter
