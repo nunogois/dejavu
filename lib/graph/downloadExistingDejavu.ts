@@ -18,7 +18,7 @@ export async function downloadExistingDejavu(
     )
 
     if (process.env.RESET) {
-      console.info('Resetting dejavu file.')
+      console.log('Resetting dejavu file.')
       await removeFile(accessToken, driveId, itemId)
       return []
     }
@@ -26,9 +26,11 @@ export async function downloadExistingDejavu(
     const buffer = await downloadFile(accessToken, driveId, itemId)
     const rows = parseExcel(buffer)
 
+    console.log(`Found existing dejavu file with ${rows.length} rows.`)
+
     return rows
   } catch (e) {
-    console.info('No existing dejavu file found.', e)
+    console.log('No existing dejavu file found.', e)
     return []
   }
 }

@@ -17,6 +17,8 @@ export async function processReports(
   outputFile: string | null,
   skipAlreadyReported: boolean
 ) {
+  console.log('Processing reports...')
+
   const dejavuFile = `${outputFile || 'dejavu'}.xlsx`
 
   const existing = await downloadExistingDejavu(
