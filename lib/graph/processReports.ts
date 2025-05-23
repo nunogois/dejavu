@@ -86,7 +86,10 @@ export async function processReports(
     isSharedFolder
   )
 
-  const message = `Uploaded ${newCount} duplicate rows to ${dejavuFile}.`
+  const message = `Uploaded ${newCount}/${newRows.length} (${(
+    (newCount / newRows.length) *
+    100
+  ).toFixed(2)}%) duplicate rows to ${dejavuFile}.`
   console.log(message)
   return message
 }
