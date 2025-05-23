@@ -2,42 +2,54 @@ import { DataRow } from '@/types/datarow'
 import { findColumn } from './findColumn'
 
 export function findDuplicates(
-  allRows: DataRow[],
+  existingRows: DataRow[],
+  newRows: DataRow[],
   column: string
 ): { grouped: DataRow[]; newCount: number } {
-  if (allRows.length === 0) return { grouped: [], newCount: 0 }
-
-  const targetColumn = findColumn(allRows[0], column)
+  const targetColumn = findColumn([...existingRows, ...newRows][0], column)
   if (!targetColumn) throw new Error('Could not find target column in rows.')
 
-  const groups = new Map<string, DataRow[]>()
-  const seenSignatures = new Set<string>()
-  let newCount = 0
+  const groupedMap = new Map<string, DataRow[]>()
+  const signatureSet = new Set<string>()
 
-  for (const row of allRows) {
-    const key = row[targetColumn]
+  for (const row of existingRows) {
+    const key = String(row[targetColumn])
     if (!key) continue
 
-    if (!groups.has(key as string)) groups.set(key as string, [])
+    if (!groupedMap.has(key)) groupedMap.set(key, [])
+    const group = groupedMap.get(key)!
 
-    const group = groups.get(key as string)!
     const signature = rowSignature(row)
-
-    const alreadyInGroup = group.some(r => rowSignature(r) === signature)
-    if (!alreadyInGroup) {
+    if (!group.some(r => rowSignature(r) === signature)) {
       group.push(row)
-      if (!seenSignatures.has(signature)) {
-        seenSignatures.add(signature)
+      signatureSet.add(signature)
+    }
+  }
+
+  let newCount = 0
+
+  for (const row of newRows) {
+    const key = String(row[targetColumn])
+    if (!key) continue
+
+    if (!groupedMap.has(key)) groupedMap.set(key, [])
+    const group = groupedMap.get(key)!
+
+    const signature = rowSignature(row)
+    if (!group.some(r => rowSignature(r) === signature)) {
+      group.push(row)
+
+      if (!signatureSet.has(signature)) {
         newCount++
+        signatureSet.add(signature)
       }
     }
   }
 
   const grouped: DataRow[] = []
-
-  for (const rows of groups.values()) {
-    if (rows.length <= 1) continue
-    grouped.push(...rows, {})
+  for (const group of groupedMap.values()) {
+    if (group.length <= 1) continue
+    grouped.push(...group, {})
   }
 
   return { grouped, newCount }
