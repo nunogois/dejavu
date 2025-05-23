@@ -6,6 +6,8 @@ import { buildSummaryExcel } from './buildSummaryExcel'
 import { retryUploadSummary } from './retryUploadSummary'
 import { downloadExistingDejavu } from './downloadExistingDejavu'
 import { DataRow } from '@/types/datarow'
+import { buildSignatureSet } from './buildSignatureSet'
+import { getRowSignature } from './getRowSignature'
 
 export async function processReports(
   accessToken: string,
@@ -38,13 +40,15 @@ export async function processReports(
       )
     : new Set<string>()
 
+  const existingSignatures = buildSignatureSet(existing)
+
   const { driveId, files } = await listFiles(
     accessToken,
     folderName,
     isSharedFolder
   )
 
-  const newRows: DataRow[] = []
+  const incoming: DataRow[] = []
 
   for (const file of files) {
     const name = file.name.toLowerCase()
@@ -58,24 +62,21 @@ export async function processReports(
 
     console.log(`Processing file: ${file.name}...`)
     const buffer = await downloadFile(accessToken, driveId, file.id)
-    const rows = parseExcel(buffer, {
-      sheetName,
-      fileName: file.name
+    const rows = parseExcel(buffer, { sheetName, fileName: file.name })
+
+    rows.forEach(r => {
+      const sig = getRowSignature(r)
+      if (!existingSignatures.has(sig)) incoming.push(r)
     })
-    newRows.push(...rows)
   }
 
-  const { grouped, newCount } = findDuplicates(existing, newRows, column)
+  const { grouped, newRows } = findDuplicates(existing, incoming, column)
 
-  if (newCount === 0) {
-    const message = `No new duplicates found.`
-    console.log(message)
-    return message
+  if (newRows.length === 0) {
+    const msg = 'No new duplicates found.'
+    console.log(msg)
+    return msg
   }
-
-  console.log(
-    `Found ${newCount} new duplicate rows in ${newRows.length} total processed rows.`
-  )
 
   const summary = buildSummaryExcel(grouped)
   await retryUploadSummary(
@@ -86,10 +87,8 @@ export async function processReports(
     isSharedFolder
   )
 
-  const message = `Uploaded ${newCount}/${newRows.length} (${(
-    (newCount / newRows.length) *
-    100
-  ).toFixed(2)}%) duplicate rows to ${dejavuFile}.`
-  console.log(message)
-  return message
+  const ratio = ((newRows.length / incoming.length) * 100).toFixed(2)
+  const msg = `Updated ${dejavuFile} with ${newRows.length}/${incoming.length} (${ratio} %) duplicate rows.`
+  console.log(msg)
+  return msg
 }

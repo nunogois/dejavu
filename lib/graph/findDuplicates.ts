@@ -1,60 +1,50 @@
 import { DataRow } from '@/types/datarow'
 import { findColumn } from './findColumn'
+import { buildSignatureSet } from './buildSignatureSet'
+import { getRowSignature } from './getRowSignature'
 
 export function findDuplicates(
-  existingRows: DataRow[],
-  newRows: DataRow[],
+  existing: DataRow[],
+  incoming: DataRow[],
   column: string
-): { grouped: DataRow[]; newCount: number } {
-  const allRows = [...existingRows, ...newRows]
-  if (allRows.length === 0) return { grouped: [], newCount: 0 }
+): { grouped: DataRow[]; newRows: DataRow[] } {
+  if (!existing.length && !incoming.length) {
+    return { grouped: [], newRows: [] }
+  }
 
-  const targetColumn = findColumn(allRows[0], column)
-  if (!targetColumn) throw new Error('Could not find target column in rows.')
+  const keyCol = findColumn(existing[0] ?? incoming[0], column)
+  if (!keyCol) throw new Error(`Column "${column}" not found.`)
 
-  const groupedMap = new Map<string, { existing: DataRow[]; new: DataRow[] }>()
+  const buckets = new Map<
+    string,
+    { existing: DataRow[]; incoming: DataRow[] }
+  >()
+
+  const addToBucket = (row: DataRow, bucketPart: 'existing' | 'incoming') => {
+    const key = String(row[keyCol]).trim().toLowerCase()
+    if (!key) return
+    if (!buckets.has(key)) buckets.set(key, { existing: [], incoming: [] })
+    buckets.get(key)![bucketPart].push(row)
+  }
+
+  existing.forEach(r => addToBucket(r, 'existing'))
+  incoming.forEach(r => addToBucket(r, 'incoming'))
+
   const grouped: DataRow[] = []
-  let newCount = 0
+  const newRows: DataRow[] = []
 
-  const getKey = (row: DataRow) =>
-    String(row[targetColumn])?.trim().toLowerCase()
-
-  for (const row of existingRows) {
-    const key = getKey(row)
-    if (!key) continue
-    if (!groupedMap.has(key)) groupedMap.set(key, { existing: [], new: [] })
-    groupedMap.get(key)!.existing.push(row)
-  }
-
-  for (const row of newRows) {
-    const key = getKey(row)
-    if (!key) continue
-    if (!groupedMap.has(key)) groupedMap.set(key, { existing: [], new: [] })
-    groupedMap.get(key)!.new.push(row)
-  }
-
-  for (const { existing, new: newOnes } of groupedMap.values()) {
-    const all = [...existing, ...newOnes]
-    if (all.length <= 1) continue
+  for (const { existing, incoming } of buckets.values()) {
+    const all = [...existing, ...incoming]
+    if (all.length < 2) continue
 
     grouped.push(...all, {})
 
-    const seen = new Set<string>()
-    for (const row of newOnes) {
-      const sig = rowSignature(row)
-      if (!seen.has(sig)) {
-        seen.add(sig)
-        newCount++
-      }
-    }
+    const existingSigs = buildSignatureSet(existing)
+    incoming.forEach(row => {
+      const sig = getRowSignature(row)
+      if (!existingSigs.has(sig)) newRows.push(row)
+    })
   }
 
-  return { grouped, newCount }
-}
-
-function rowSignature(row: DataRow): string {
-  const rowCopy = { ...row }
-  delete rowCopy.__sourceFile
-  delete rowCopy.__rowIndex
-  return JSON.stringify(rowCopy)
+  return { grouped, newRows }
 }
