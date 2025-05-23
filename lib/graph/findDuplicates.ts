@@ -33,7 +33,7 @@ export function findDuplicates(
     groupedMap.get(key)!.new.push(row)
   }
 
-  for (const [_, { existing, new: newOnes }] of groupedMap.entries()) {
+  for (const { existing, new: newOnes } of groupedMap.values()) {
     const all = [...existing, ...newOnes]
     if (all.length <= 1) continue
 
