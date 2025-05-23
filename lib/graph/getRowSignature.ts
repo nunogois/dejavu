@@ -1,8 +1,10 @@
 import { DataRow } from '@/types/datarow'
 
 export function getRowSignature(row: DataRow): string {
-  const copy = { ...row }
-  delete copy.__sourceFile
-  delete copy.__rowIndex
-  return JSON.stringify(copy)
+  const clean = Object.fromEntries(
+    Object.entries(row)
+      .filter(([k]) => !k.startsWith('__'))
+      .sort(([a], [b]) => a.localeCompare(b))
+  )
+  return JSON.stringify(clean)
 }
