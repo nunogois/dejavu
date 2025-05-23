@@ -66,7 +66,10 @@ export async function processReports(
 
     rows.forEach(r => {
       const sig = getRowSignature(r)
-      if (!existingSignatures.has(sig)) incoming.push(r)
+      if (!existingSignatures.has(sig)) {
+        incoming.push(r)
+        existingSignatures.add(sig)
+      }
     })
   }
 
