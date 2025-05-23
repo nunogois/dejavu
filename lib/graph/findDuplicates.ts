@@ -44,6 +44,8 @@ export function findDuplicates(
 }
 
 function rowSignature(row: DataRow): string {
-  const { __sourceFile, __rowIndex, ...rest } = row
-  return JSON.stringify(rest)
+  const rowCopy = { ...row }
+  delete rowCopy.__sourceFile
+  delete rowCopy.__rowIndex
+  return JSON.stringify(rowCopy)
 }
