@@ -3,7 +3,6 @@ import { findColumn } from './findColumn'
 
 export function findDuplicates(
   allRows: DataRow[],
-  alreadyProcessed: Set<string>,
   column: string
 ): { grouped: DataRow[]; newCount: number } {
   if (allRows.length === 0) return { grouped: [], newCount: 0 }
@@ -12,29 +11,39 @@ export function findDuplicates(
   if (!targetColumn) throw new Error('Could not find target column in rows.')
 
   const groups = new Map<string, DataRow[]>()
+  const seenSignatures = new Set<string>()
+  let newCount = 0
 
   for (const row of allRows) {
     const key = row[targetColumn]
     if (!key) continue
+
     if (!groups.has(key as string)) groups.set(key as string, [])
-    groups.get(key as string)!.push(row)
-  }
 
-  const grouped: DataRow[] = []
-  let newCount = 0
+    const group = groups.get(key as string)!
+    const signature = rowSignature(row)
 
-  for (const rows of groups.values()) {
-    if (rows.length <= 1) continue
-
-    grouped.push(...rows, {})
-
-    for (const row of rows) {
-      const src = (row.__sourceFile as string)?.toLowerCase()
-      if (src && !alreadyProcessed.has(src)) {
+    const alreadyInGroup = group.some(r => rowSignature(r) === signature)
+    if (!alreadyInGroup) {
+      group.push(row)
+      if (!seenSignatures.has(signature)) {
+        seenSignatures.add(signature)
         newCount++
       }
     }
   }
 
+  const grouped: DataRow[] = []
+
+  for (const rows of groups.values()) {
+    if (rows.length <= 1) continue
+    grouped.push(...rows, {})
+  }
+
   return { grouped, newCount }
+}
+
+function rowSignature(row: DataRow): string {
+  const { __sourceFile, __rowIndex, ...rest } = row
+  return JSON.stringify(rest)
 }

@@ -1,5 +1,6 @@
 import { downloadFile } from './downloadFile'
 import { parseExcel } from './parseExcel'
+import { removeFile } from './removeFile'
 import { resolveOneDrivePath } from './resolveOneDrivePath'
 
 export async function downloadExistingDejavu(
@@ -15,6 +16,12 @@ export async function downloadExistingDejavu(
       dejavuFile,
       isSharedFolder
     )
+
+    if (process.env.RESET) {
+      console.info('Resetting dejavu file.')
+      await removeFile(accessToken, driveId, itemId)
+      return []
+    }
 
     const buffer = await downloadFile(accessToken, driveId, itemId)
     const rows = parseExcel(buffer)

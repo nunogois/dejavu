@@ -62,11 +62,7 @@ export async function processReports(
   }
 
   const allRows = [...existing, ...newRows]
-  const { grouped, newCount } = findDuplicates(
-    allRows,
-    alreadyProcessed,
-    column
-  )
+  const { grouped, newCount } = findDuplicates(allRows, column)
 
   if (newCount === 0) {
     const message = `No new duplicates found.`
