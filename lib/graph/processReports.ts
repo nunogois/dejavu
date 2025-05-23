@@ -15,7 +15,8 @@ export async function processReports(
   sheetName: string | null,
   fileFilter: string | null,
   outputFile: string | null,
-  skipAlreadyReported: boolean
+  skipAlreadyReported: boolean,
+  resetExistingDejavuFile: boolean
 ) {
   console.log('Processing reports...')
 
@@ -25,7 +26,8 @@ export async function processReports(
     accessToken,
     folderName,
     dejavuFile,
-    isSharedFolder
+    isSharedFolder,
+    resetExistingDejavuFile
   )
 
   const alreadyProcessed = skipAlreadyReported

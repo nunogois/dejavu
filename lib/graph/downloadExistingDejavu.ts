@@ -7,7 +7,8 @@ export async function downloadExistingDejavu(
   accessToken: string,
   folderName: string,
   dejavuFile: string,
-  isSharedFolder: boolean
+  isSharedFolder: boolean,
+  resetExistingDejavuFile: boolean = false
 ) {
   try {
     const { driveId, itemId } = await resolveOneDrivePath(
@@ -17,7 +18,7 @@ export async function downloadExistingDejavu(
       isSharedFolder
     )
 
-    if (process.env.RESET) {
+    if (resetExistingDejavuFile) {
       console.log('Resetting dejavu file.')
       await removeFile(accessToken, driveId, itemId)
       return []

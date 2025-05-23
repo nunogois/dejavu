@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
   const fileFilter = searchParams.get('file_filter')
   const outputFile = searchParams.get('output_file')
   const skipAlreadyReported = searchParams.get('skip_already_reported') === '1'
+  const resetExistingDejavuFile =
+    searchParams.get('reset_existing_dejavu_file') === '1'
 
   if (!folder || !column) {
     return new Response('Missing folder or column', { status: 400 })
@@ -49,7 +51,8 @@ export async function GET(req: NextRequest) {
       sheet,
       fileFilter,
       outputFile,
-      skipAlreadyReported
+      skipAlreadyReported,
+      resetExistingDejavuFile
     )
     return Response.json({ message: result })
   } catch (e) {
